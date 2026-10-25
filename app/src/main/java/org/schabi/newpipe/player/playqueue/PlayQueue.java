@@ -49,7 +49,7 @@ public abstract class PlayQueue implements Serializable {
     private transient Flowable<PlayQueueEvent> broadcastReceiver;
     private transient boolean disposed = false;
 
-    PlayQueue(final int index, final List<PlayQueueItem> startWith) {
+   PlayQueue(final int index, final List<PlayQueueItem> startWith) {
         streams = new ArrayList<>(startWith);
 
         if (streams.size() > index) {
@@ -57,6 +57,18 @@ public abstract class PlayQueue implements Serializable {
         }
 
         queueIndex = new AtomicInteger(index);
+
+        // Tự động kích hoạt shuffle mặc định khi khởi tạo playlist
+        if (streams.size() > 2) {
+            backup = new ArrayList<>(streams);
+            final PlayQueueItem currentItem = getItem(index);
+            Collections.shuffle(streams);
+            if (currentItem != null) {
+                streams.remove(currentItem);
+                streams.add(0, currentItem);
+                queueIndex.set(0);
+            }
+        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////
